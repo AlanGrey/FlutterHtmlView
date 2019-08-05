@@ -23,7 +23,15 @@ class HtmlParser {
       if (src.startsWith("http") || src.startsWith("https")) {
         widgetList.add(new CachedNetworkImage(
           imageUrl: src,
+          fadeOutDuration: Duration(milliseconds: 150),
+          fadeInDuration: Duration(milliseconds: 450),
           fit: BoxFit.cover,
+          errorWidget: (context, url, error) {
+            return Container(color: Color(0xfff1f1f1));
+          },
+          placeholder: (context, url) {
+            return Container(color: Color(0xfff1f1f1));
+          },
         ));
       } else if (src.startsWith('data:image')) {
         var exp = new RegExp(r'data:.*;base64,');
@@ -43,8 +51,7 @@ class HtmlParser {
         widgetList.add(
           new NetworkPlayerLifeCycle(
             src,
-            (BuildContext context, VideoPlayerController controller) =>
-                new AspectRatioVideo(controller),
+            (BuildContext context, VideoPlayerController controller) => new AspectRatioVideo(controller),
           ),
         );
       } else {
@@ -56,8 +63,7 @@ class HtmlParser {
                 widgetList.add(
                   new NetworkPlayerLifeCycle(
                     src,
-                    (BuildContext context, VideoPlayerController controller) =>
-                        new AspectRatioVideo(controller),
+                    (BuildContext context, VideoPlayerController controller) => new AspectRatioVideo(controller),
                   ),
                 );
               }
@@ -67,12 +73,14 @@ class HtmlParser {
           });
         }
       }
-    } else if (!e.outerHtml.contains("<img") ||
-        !e.outerHtml.contains("<video") ||
-        !e.hasContent()) {
-      widgetList.add(new HtmlText(data: e.outerHtml, onLaunchFail: this.onLaunchFail, overflow: this.overflow, maxLines: this.maxLines,));
-    } else if (e.children.length > 0)
-      e.children.forEach((e) => _parseChildren(e, widgetList));
+    } else if (!e.outerHtml.contains("<img") || !e.outerHtml.contains("<video") || !e.hasContent()) {
+      widgetList.add(new HtmlText(
+        data: e.outerHtml,
+        onLaunchFail: this.onLaunchFail,
+        overflow: this.overflow,
+        maxLines: this.maxLines,
+      ));
+    } else if (e.children.length > 0) e.children.forEach((e) => _parseChildren(e, widgetList));
   }
 
   List<Widget> parseHTML(String html) {
@@ -96,8 +104,7 @@ class HtmlParser {
     }
 
     List<dom.Element> docBodyChildren = docBody.children;
-    if (docBodyChildren.length > 0)
-      docBodyChildren.forEach((e) => _parseChildren(e, widgetList));
+    if (docBodyChildren.length > 0) docBodyChildren.forEach((e) => _parseChildren(e, widgetList));
 
     return widgetList;
   }
