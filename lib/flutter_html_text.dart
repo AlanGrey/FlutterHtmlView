@@ -10,16 +10,14 @@ class HtmlText extends StatelessWidget {
   final int maxLines;
   final Function onLaunchFail;
 
-  BuildContext ctx;
-
   HtmlText({this.data, this.style, this.onLaunchFail, this.overflow, this.maxLines});
 
-  void _launchURL(String url) async {
+  void _launchURL(BuildContext context, String url) async {
     try {
       await cTab.launch(
         url,
         option: new cTab.CustomTabsOption(
-          toolbarColor: Theme.of(ctx).primaryColor,
+          toolbarColor: Theme.of(context).primaryColor,
           enableDefaultShare: true,
           enableUrlBarHiding: true,
           showPageTitle: true,
@@ -43,11 +41,11 @@ class HtmlText extends StatelessWidget {
     }
   }
 
-  TapGestureRecognizer recognizer(String url) {
+  TapGestureRecognizer recognizer(BuildContext context, String url) {
     return new TapGestureRecognizer()
       ..onTap = () {
         if (url.startsWith("http://") || url.startsWith("https://")) {
-          _launchURL(url);
+          _launchURL(context, url);
         } else {
           _launchOtherURL(url);
         }
@@ -56,12 +54,10 @@ class HtmlText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ctx = context;
     HtmlParser parser = new HtmlParser(context);
     List nodes = parser.parse(this.data);
 
     TextSpan span = this._stackToTextSpan(nodes, context);
-
 
     RichText contents;
     if (overflow != null && maxLines != null) {
@@ -78,26 +74,20 @@ class HtmlText extends StatelessWidget {
       );
     }
 
-    return new Container(
-        padding:
-            const EdgeInsets.only(top: 2.0, left: 8.0, right: 8.0, bottom: 2.0),
-        child: contents);
+    return new Container(padding: const EdgeInsets.only(top: 2.0, left: 8.0, right: 8.0, bottom: 2.0), child: contents);
   }
 
   TextSpan _stackToTextSpan(List nodes, BuildContext context) {
     List<TextSpan> children = <TextSpan>[];
 
     for (int i = 0; i < nodes.length; i++) {
-      children.add(_textSpan(nodes[i]));
+      children.add(_textSpan(nodes[i], context));
     }
 
-    return new TextSpan(
-        text: '',
-        style: DefaultTextStyle.of(context).style,
-        children: children);
+    return new TextSpan(text: '', style: DefaultTextStyle.of(context).style, children: children);
   }
 
-  TextSpan _textSpan(Map node) {
+  TextSpan _textSpan(Map node, BuildContext context) {
     TextSpan span;
     String s = node['text'];
 
@@ -108,8 +98,7 @@ class HtmlText extends StatelessWidget {
     s = s.replaceAll('&gt;', '>');
 
     if (node['tag'] == 'a') {
-      span = new TextSpan(
-          text: s, style: node['style'], recognizer: recognizer(node['href']));
+      span = new TextSpan(text: s, style: node['style'], recognizer: recognizer(context, node['href']));
     } else {
       span = new TextSpan(
         text: s,
@@ -227,19 +216,7 @@ class HtmlParser {
     'u',
     'var'
   ];
-  final List _closeSelfTags = const [
-    'colgroup',
-    'dd',
-    'dt',
-    'li',
-    'options',
-    'p',
-    'td',
-    'tfoot',
-    'th',
-    'thead',
-    'tr'
-  ];
+  final List _closeSelfTags = const ['colgroup', 'dd', 'dt', 'li', 'options', 'p', 'td', 'tfoot', 'th', 'thead', 'tr'];
   final List _fillAttrs = const [
     'checked',
     'compact',
@@ -263,13 +240,11 @@ class HtmlParser {
   Map<String, dynamic> _tag;
 
   HtmlParser(this.context) {
-    this._startTag = new RegExp(
-        r'^<([-A-Za-z0-9_]+)((?:\s+[-\w]+(?:\s*=\s*(?:(?:"[^"]*")' +
-            "|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>");
+    this._startTag =
+        new RegExp(r'^<([-A-Za-z0-9_]+)((?:\s+[-\w]+(?:\s*=\s*(?:(?:"[^"]*")' + "|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>");
     this._endTag = new RegExp("^<\/([-A-Za-z0-9_]+)[^>]*>");
-    this._attr = new RegExp(
-        r'([-A-Za-z0-9_]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")' +
-            r"|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?");
+    this._attr =
+        new RegExp(r'([-A-Za-z0-9_]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")' + r"|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?");
     this._style = new RegExp(r'([a-zA-Z\-]+)\s*:\s*([^;]*)');
     this._color = new RegExp(r'^#([a-fA-F0-9]{6})$');
   }
@@ -284,8 +259,7 @@ class HtmlParser {
       chars = true;
 
       // Make sure we're not in a script or style element
-      if (this._getStackLastItem() == null ||
-          !this._specialTags.contains(this._getStackLastItem())) {
+      if (this._getStackLastItem() == null || !this._specialTags.contains(this._getStackLastItem())) {
         // Comment
         if (html.indexOf('<!--') == 0) {
           index = html.indexOf('-->');
@@ -332,8 +306,7 @@ class HtmlParser {
           this._appendNode(text);
         }
       } else {
-        RegExp re =
-            new RegExp(r'(.*)<\/' + this._getStackLastItem() + r'[^>]*>');
+        RegExp re = new RegExp(r'(.*)<\/' + this._getStackLastItem() + r'[^>]*>');
 
         html = html.replaceAllMapped(re, (Match match) {
           String text = match[0]
@@ -371,14 +344,12 @@ class HtmlParser {
     tagName = tagName.toLowerCase();
 
     if (this._blockTags.contains(tagName)) {
-      while (this._getStackLastItem() != null &&
-          this._inlineTags.contains(this._getStackLastItem())) {
+      while (this._getStackLastItem() != null && this._inlineTags.contains(this._getStackLastItem())) {
         this._parseEndTag(this._getStackLastItem());
       }
     }
 
-    if (this._closeSelfTags.contains(tagName) &&
-        this._getStackLastItem() == tagName) {
+    if (this._closeSelfTags.contains(tagName) && this._getStackLastItem() == tagName) {
       this._parseEndTag(tagName);
     }
 
@@ -508,26 +479,22 @@ class HtmlParser {
             break;
 
           case 'font-weight':
-            fontWeight =
-                (value == 'bold') ? FontWeight.bold : FontWeight.normal;
+            fontWeight = (value == 'bold') ? FontWeight.bold : FontWeight.normal;
 
             break;
 
           case 'font-style':
-            fontStyle =
-                (value == 'italic') ? FontStyle.italic : FontStyle.normal;
+            fontStyle = (value == 'italic') ? FontStyle.italic : FontStyle.normal;
 
             break;
 
           case 'font-size':
-             fontSize = double.parse(value);
-             
+            fontSize = double.parse(value);
+
             break;
 
           case 'text-decoration':
-            textDecoration = (value == 'underline')
-                ? TextDecoration.underline
-                : TextDecoration.none;
+            textDecoration = (value == 'underline') ? TextDecoration.underline : TextDecoration.none;
 
             break;
         }
@@ -538,11 +505,7 @@ class HtmlParser {
 
     if (fontSize != 0.0) {
       textStyle = new TextStyle(
-          color: color,
-          fontWeight: fontWeight,
-          fontStyle: fontStyle,
-          decoration: textDecoration,
-          fontSize: fontSize);
+          color: color, fontWeight: fontWeight, fontStyle: fontStyle, decoration: textDecoration, fontSize: fontSize);
     } else {
       textStyle = new TextStyle(
         color: color,
@@ -566,8 +529,7 @@ class HtmlParser {
 
     this._tag['text'] = text;
     this._tag['style'] = this._parseStyle(this._tag['tag'], this._tag['attrs']);
-    this._tag['href'] =
-        (this._tag['attrs']['href'] != null) ? this._tag['attrs']['href'] : '';
+    this._tag['href'] = (this._tag['attrs']['href'] != null) ? this._tag['attrs']['href'] : '';
 
     this._tag.remove('attrs');
 

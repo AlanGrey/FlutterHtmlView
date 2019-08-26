@@ -8,6 +8,8 @@ import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' show parse;
 import 'package:video_player/video_player.dart';
 
+import 'manager/html_image_cache_manager.dart';
+
 class HtmlParser {
   TextOverflow overflow;
   int maxLines;
@@ -22,6 +24,7 @@ class HtmlParser {
 
       if (src.startsWith("http") || src.startsWith("https")) {
         widgetList.add(new CachedNetworkImage(
+          cacheManager: HtmlImageCacheManager(),
           imageUrl: src,
           fadeOutDuration: Duration(milliseconds: 150),
           fadeInDuration: Duration(milliseconds: 450),
@@ -40,6 +43,7 @@ class HtmlParser {
         widgetList.add(new Image.memory(bytes, fit: BoxFit.cover));
       } else if (baseUrl != null && baseUrl.isNotEmpty && src.startsWith("/")) {
         widgetList.add(new CachedNetworkImage(
+          cacheManager: HtmlImageCacheManager(),
           imageUrl: baseUrl + src,
           fit: BoxFit.cover,
         ));

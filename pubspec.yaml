@@ -7,16 +7,21 @@ homepage: https://github.com/PonnamKarthik/FlutterHtmlView
 dependencies:
   flutter:
     sdk: flutter
+  path_provider: ^1.2.0
   flutter_custom_tabs:
     git: git://github.com/ohze/flutter_custom_tabs.git
-  html: ^0.13.3+3
+  html: ^0.14.0+2
   video_player: 0.10.1+6
   cached_network_image: ^1.1.1
+  flutter_cache_manager: ^1.1.1
 
-  flutter_markdown: ^0.2.0
-  html2md: ^0.3.0
+  flutter_markdown:
+    path: flutter_markdown/
+  html2md:
+    path: html2md/
 
 
 environment:
-  sdk: ">=2.0.0-dev.28.0 <3.0.0"
+
+  sdk: ">=2.1.0 <3.0.0"
   flutter: ">=0.1.4 <2.0.0"

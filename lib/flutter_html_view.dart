@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 import 'package:html2md/html2md.dart' as html2md;
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart' as cTab;
 import 'package:url_launcher/url_launcher.dart';
 
@@ -10,8 +10,7 @@ class HtmlView extends StatelessWidget {
   final Function onLaunchFail;
   final bool scrollable;
   final EdgeInsets padding;
-  Map<String, String> stylingOptions;
-  BuildContext ctx;
+  final Map<String, String> stylingOptions;
 
   /// If [scrollable] is set to false then you must handle scrolling outside of this widget.
   /// This can be acheived by using a [SingleChildScrollView].
@@ -19,28 +18,27 @@ class HtmlView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ctx = context;
     if (scrollable) {
       return Markdown(
         data: _htmlMd(data, stylingOptions),
         onTapLink: (url) {
           if (url.startsWith("http://") || url.startsWith("https://")) {
-            _launchURL(url);
+            _launchURL(context, url);
           } else {
             _launchOtherURL(url);
           }
         },
         padding: padding,
       );
-    }
-    else {
+    } else {
       return Container(
         padding: padding,
-        child: MarkdownBody( // Doesn't use a list view, hence no scrolling. 
+        child: MarkdownBody(
+          // Doesn't use a list view, hence no scrolling.
           data: _htmlMd(data, stylingOptions),
           onTapLink: (url) {
             if (url.startsWith("http://") || url.startsWith("https://")) {
-              _launchURL(url);
+              _launchURL(context, url);
             } else {
               _launchOtherURL(url);
             }
@@ -50,7 +48,6 @@ class HtmlView extends StatelessWidget {
     }
   }
 
-
   String _htmlMd(String html, Map<String, String> stylingOptions) {
     if (stylingOptions != null) {
       return html2md.convert(html, styleOptions: stylingOptions);
@@ -59,13 +56,12 @@ class HtmlView extends StatelessWidget {
     }
   }
 
-
-  void _launchURL(String url) async {
+  void _launchURL(BuildContext context, String url) async {
     try {
       await cTab.launch(
         url,
         option: new cTab.CustomTabsOption(
-          toolbarColor: Theme.of(ctx).primaryColor,
+          toolbarColor: Theme.of(context).primaryColor,
           enableDefaultShare: true,
           enableUrlBarHiding: true,
           showPageTitle: true,
@@ -89,5 +85,4 @@ class HtmlView extends StatelessWidget {
       }
     }
   }
-
 }

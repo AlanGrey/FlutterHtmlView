@@ -25,7 +25,7 @@ class _MyAppState extends State<MyApp> {
         <h6>This is heading 6</h6>
         <a href="https://google.com">Google</a>
         <br/>
-        <img alt="Test Image" src="https://source.unsplash.com/random/300x200">
+        <img alt="Test Image" src="https://source.unsplash.com/random/300x200" width="100" height="500">
         <br/>
         <video src="https://www.sample-videos.com/video/mp4/720/big_buck_bunny_720p_5mb.mp4"></video>
         <br/>

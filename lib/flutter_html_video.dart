@@ -13,8 +13,7 @@ class VideoPlayPause extends StatefulWidget {
 }
 
 class _VideoPlayPauseState extends State<VideoPlayPause> {
-  FadeAnimation imageFadeAnim =
-      new FadeAnimation(child: const Icon(Icons.play_arrow, size: 100.0));
+  FadeAnimation imageFadeAnim = new FadeAnimation(child: const Icon(Icons.play_arrow, size: 100.0));
   VoidCallback listener;
 
   _VideoPlayPauseState() {
@@ -50,12 +49,10 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
             return;
           }
           if (controller.value.isPlaying) {
-            imageFadeAnim =
-                new FadeAnimation(child: const Icon(Icons.pause, size: 100.0));
+            imageFadeAnim = new FadeAnimation(child: const Icon(Icons.pause, size: 100.0));
             controller.pause();
           } else {
-            imageFadeAnim = new FadeAnimation(
-                child: const Icon(Icons.play_arrow, size: 100.0));
+            imageFadeAnim = new FadeAnimation(child: const Icon(Icons.play_arrow, size: 100.0));
             controller.play();
           }
         },
@@ -86,15 +83,13 @@ class FadeAnimation extends StatefulWidget {
   _FadeAnimationState createState() => new _FadeAnimationState();
 }
 
-class _FadeAnimationState extends State<FadeAnimation>
-    with SingleTickerProviderStateMixin {
+class _FadeAnimationState extends State<FadeAnimation> with SingleTickerProviderStateMixin {
   AnimationController animationController;
 
   @override
   void initState() {
     super.initState();
-    animationController =
-        new AnimationController(duration: widget.duration, vsync: this);
+    animationController = new AnimationController(duration: widget.duration, vsync: this);
     animationController.addListener(() {
       if (mounted) {
         setState(() {});
@@ -134,8 +129,7 @@ class _FadeAnimationState extends State<FadeAnimation>
   }
 }
 
-typedef Widget VideoWidgetBuilder(
-    BuildContext context, VideoPlayerController controller);
+typedef Widget VideoWidgetBuilder(BuildContext context, VideoPlayerController controller);
 
 abstract class PlayerLifeCycle extends StatefulWidget {
   final VideoWidgetBuilder childBuilder;
@@ -147,12 +141,10 @@ abstract class PlayerLifeCycle extends StatefulWidget {
 /// A widget connecting its life cycle to a [VideoPlayerController] using
 /// a data source from the network.
 class NetworkPlayerLifeCycle extends PlayerLifeCycle {
-  NetworkPlayerLifeCycle(String dataSource, VideoWidgetBuilder childBuilder)
-      : super(dataSource, childBuilder);
+  NetworkPlayerLifeCycle(String dataSource, VideoWidgetBuilder childBuilder) : super(dataSource, childBuilder);
 
   @override
-  _NetworkPlayerLifeCycleState createState() =>
-      new _NetworkPlayerLifeCycleState();
+  _NetworkPlayerLifeCycleState createState() => new _NetworkPlayerLifeCycleState();
 }
 
 abstract class _PlayerLifeCycleState extends State<PlayerLifeCycle> {
