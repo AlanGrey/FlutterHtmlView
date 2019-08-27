@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 
-import 'package:html2md/html2md.dart' as html2md;
+import 'package:flutter_html_view/html2md/html2md.dart' as html2md;
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart' as cTab;
+import 'package:flutter_html_view/markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HtmlView extends StatelessWidget {
