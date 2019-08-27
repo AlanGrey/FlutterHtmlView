@@ -61,14 +61,12 @@ class Rule {
 
   static Rule findRule(Node node, [List<Rule> customRules]) {
     if (customRules != null) {
-      var customRule = customRules.firstWhere((rule) => rule._check(node),
-          orElse: () => null);
+      var customRule = customRules.firstWhere((rule) => rule._check(node), orElse: () => null);
       if (customRule != null) return customRule;
     }
 
     if (node.isBlank) return _Rules._blankRule;
-    return _commonMarkRules.firstWhere((rule) => rule._check(node),
-        orElse: () => _Rules._defaultRule);
+    return _commonMarkRules.firstWhere((rule) => rule._check(node), orElse: () => _Rules._defaultRule);
   }
 
   static _FilterFn _buildFilterFn(List<String> filters, _FilterFn filterFn) {
@@ -81,29 +79,24 @@ class Rule {
 }
 
 abstract class _Rules {
-  static final Rule _blankRule =
-      new Rule('blank', filters: ['blank'], replacement: (content, node) {
+  static final Rule _blankRule = new Rule('blank', filters: ['blank'], replacement: (content, node) {
     return node.isBlock ? '\n\n' : '';
   });
 
-  static final Rule _defaultRule =
-      new Rule('default', filters: ['default'], replacement: (content, node) {
+  static final Rule _defaultRule = new Rule('default', filters: ['default'], replacement: (content, node) {
     return node.isBlock ? '\n\n' + content + '\n\n' : content;
   });
 
-  static final Rule paragraph =
-      new Rule('paragraph', filters: ['p'], replacement: (content, node) {
+  static final Rule paragraph = new Rule('paragraph', filters: ['p'], replacement: (content, node) {
     return '\n\n$content\n\n';
   });
 
-  static final Rule lineBreak =
-      new Rule('lineBreak', filters: ['br'], replacement: (content, node) {
+  static final Rule lineBreak = new Rule('lineBreak', filters: ['br'], replacement: (content, node) {
     return '${getStyleOption('br')}\n';
   });
 
   static final Rule heading =
-      new Rule('heading', filters: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
-          replacement: (content, node) {
+      new Rule('heading', filters: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'], replacement: (content, node) {
     var hLevel = int.parse(node.nodeName.substring(1, 2));
     if (getStyleOption('headingStyle') == 'setext' && hLevel < 3) {
       var underline = util.repeat(hLevel == 1 ? '=' : '-', content.length);
@@ -113,16 +106,13 @@ abstract class _Rules {
     }
   });
 
-  static final Rule blockquote = new Rule('blockquote', filters: ['blockquote'],
-      replacement: (content, node) {
-    var convertContent = content
-        .replaceAll(new RegExp(r'^\n+|\n+$'), '')
-        .replaceAll(new RegExp(r'^', multiLine: true), '> ');
+  static final Rule blockquote = new Rule('blockquote', filters: ['blockquote'], replacement: (content, node) {
+    var convertContent =
+        content.replaceAll(new RegExp(r'^\n+|\n+$'), '').replaceAll(new RegExp(r'^', multiLine: true), '> ');
     return '\n\n$convertContent\n\n';
   });
 
-  static final Rule list =
-      new Rule('list', filters: ['ul', 'ol'], replacement: (content, node) {
+  static final Rule list = new Rule('list', filters: ['ul', 'ol'], replacement: (content, node) {
     if (node.parentElName == 'li' && node.isParentLastChild) {
       return '\n$content';
     } else {
@@ -130,8 +120,7 @@ abstract class _Rules {
     }
   });
 
-  static final Rule listItem =
-      new Rule('listItem', filters: ['li'], replacement: (content, node) {
+  static final Rule listItem = new Rule('listItem', filters: ['li'], replacement: (content, node) {
     var convertContent = content
         .replaceAll(new RegExp(r'^\n+'), '')
         .replaceAll(new RegExp(r'\n+$'), '\n')
@@ -144,20 +133,14 @@ abstract class _Rules {
       } catch (e) {
         print('listItem parse start error $e');
       }
-      var index = (start > -1)
-          ? start + node.parentChildIndex
-          : node.parentChildIndex + 1;
+      var index = (start > -1) ? start + node.parentChildIndex : node.parentChildIndex + 1;
       prefix = '$index.  ';
     }
-    var postfix = ((node.nextSibling != null) &&
-            !new RegExp(r'\n$').hasMatch(convertContent))
-        ? '\n'
-        : '';
+    var postfix = ((node.nextSibling != null) && !new RegExp(r'\n$').hasMatch(convertContent)) ? '\n' : '';
     return '$prefix$convertContent$postfix';
   });
 
-  static final Rule indentedCodeBlock =
-      new Rule('indentedCodeBlock', filterFn: (node) {
+  static final Rule indentedCodeBlock = new Rule('indentedCodeBlock', filterFn: (node) {
     return getStyleOption('codeBlockStyle') == 'indented' &&
         node.nodeName == 'pre' &&
         node.firstChild != null &&
@@ -165,9 +148,7 @@ abstract class _Rules {
   }, replacement: (content, node) {
     var children = node.childNodes().toList();
     if (children.length == 1) {
-      return '\n\n    ' +
-          children.first.textContent.replaceAll(new RegExp(r'\n'), '\n    ') +
-          '\n\n';
+      return '\n\n    ' + children.first.textContent.replaceAll(new RegExp(r'\n'), '\n    ') + '\n\n';
     } else {
       var result = '\n\n    ';
       for (var child in children) {
@@ -181,8 +162,7 @@ abstract class _Rules {
     }
   });
 
-  static final Rule fencedCodeBlock =
-      new Rule('fencedCodeBlock', filterFn: (node) {
+  static final Rule fencedCodeBlock = new Rule('fencedCodeBlock', filterFn: (node) {
     return getStyleOption('codeBlockStyle') == 'fenced' &&
         node.nodeName == 'pre' &&
         node.firstChild != null &&
@@ -190,8 +170,7 @@ abstract class _Rules {
   }, replacement: (content, node) {
     var className = node.firstChild.className ?? '';
     var languageMatched = new RegExp(r'language-(\S+)').firstMatch(className);
-    var language =
-        languageMatched != null ? languageMatched.group(1) : className;
+    var language = languageMatched != null ? languageMatched.group(1) : className;
     return '\n\n' +
         getStyleOption('fence') +
         language +
@@ -202,15 +181,12 @@ abstract class _Rules {
         '\n\n';
   });
 
-  static final Rule horizontalRule =
-      new Rule('horizontalRule', filters: ['hr'], replacement: (content, node) {
+  static final Rule horizontalRule = new Rule('horizontalRule', filters: ['hr'], replacement: (content, node) {
     return '${getStyleOption('hr')}\n';
   });
 
   static final Rule inlineLink = new Rule('inlineLink', filterFn: (node) {
-    return getStyleOption('linkStyle') == 'inlined' &&
-        node.nodeName == 'a' &&
-        node.getAttribute('href') != null;
+    return getStyleOption('linkStyle') == 'inlined' && node.nodeName == 'a' && node.getAttribute('href') != null;
   }, replacement: (content, node) {
     var href = node.getAttribute('href');
     var title = node.getAttribute('title') ?? '';
@@ -218,9 +194,7 @@ abstract class _Rules {
   });
 
   static final Rule referenceLink = new Rule('referenceLink', filterFn: (node) {
-    return getStyleOption('linkStyle') == 'referenced' &&
-        node.nodeName == 'a' &&
-        node.getAttribute('href') != null;
+    return getStyleOption('linkStyle') == 'referenced' && node.nodeName == 'a' && node.getAttribute('href') != null;
   }, replacement: (content, node) {
     var href = node.getAttribute('href');
     var title = node.getAttribute('title') ?? '';
@@ -250,20 +224,14 @@ abstract class _Rules {
     return result;
   });
 
-  static final Rule emphasis =
-      new Rule('emphasis', filters: ['em', 'i'], replacement: (content, node) {
+  static final Rule emphasis = new Rule('emphasis', filters: ['em', 'i'], replacement: (content, node) {
     if (content == null || content.trim().isEmpty) return '';
-    return getStyleOption('emDelimiter') +
-        content +
-        getStyleOption('emDelimiter');
+    return getStyleOption('emDelimiter') + content + getStyleOption('emDelimiter');
   });
 
-  static final Rule strong = new Rule('strong', filters: ['strong', 'b'],
-      replacement: (content, node) {
+  static final Rule strong = new Rule('strong', filters: ['strong', 'b'], replacement: (content, node) {
     if (content == null || content.trim().isEmpty) return '';
-    return getStyleOption('strongDelimiter') +
-        content +
-        getStyleOption('strongDelimiter');
+    return getStyleOption('strongDelimiter') + content + getStyleOption('strongDelimiter');
   });
 
   static final Rule code = new Rule('code', filterFn: (node) {
@@ -275,10 +243,7 @@ abstract class _Rules {
     var delimiter = '`';
     var leadingSpace = '';
     var trailingSpace = '';
-    var matches = new RegExp(r'`+')
-        .allMatches(content)
-        .map((match) => match.group(0))
-        .toList();
+    var matches = new RegExp(r'`+').allMatches(content).map((match) => match.group(0)).toList();
     if (matches != null && matches.isNotEmpty) {
       if (new RegExp(r'^`').hasMatch(content)) leadingSpace = ' ';
       if (new RegExp(r'`$').hasMatch(content)) trailingSpace = ' ';
@@ -289,13 +254,24 @@ abstract class _Rules {
     return delimiter + leadingSpace + content + trailingSpace + delimiter;
   });
 
-  static final Rule image =
-      new Rule('image', filters: ['img'], replacement: (content, node) {
+  static final Rule image = new Rule('image', filters: ['img'], replacement: (content, node) {
     var alt = node.getAttribute('alt') ?? '';
     var src = node.getAttribute('src') ?? '';
     var title = node.getAttribute('title') ?? '';
     var titlePart = title.isNotEmpty ? ' "' + title + '"' : '';
-    return src.isNotEmpty ? '![' + alt + ']' + '(' + src + titlePart + ')' : '';
+    var width = node.getAttribute('width') ?? 0;
+    var height = node.getAttribute('height') ?? 0;
+    String wh = '';
+    if (width != 0 && height != 0) {
+      wh = '$width×$height';
+    }
+    if (src.isNotEmpty) {
+      if (wh.isNotEmpty) {
+        return '![$alt]($src$titlePart#$wh)';
+      }
+      return '![$alt]($src$titlePart)';
+    }
+    return '';
   });
 
   static Rule _buildIgnoreRule(List<String> names) {
